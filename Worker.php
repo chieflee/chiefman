@@ -11,20 +11,28 @@
  * @link      http://www.workerman.net/
  * @license   http://www.opensource.org/licenses/mit-license.php MIT License
  */
+//命名空间
 namespace Workerman;
-
+//常量
 require_once __DIR__ . '/Lib/Constants.php';
 
+//事件接口
 use Workerman\Events\EventInterface;
+//连接接口
 use Workerman\Connection\ConnectionInterface;
+//tcp连接 接口
 use Workerman\Connection\TcpConnection;
+//udp连接 接口
 use Workerman\Connection\UdpConnection;
+//计时器
 use Workerman\Lib\Timer;
+//异常
 use Exception;
 
 /**
  * Worker class
  * A container for listening ports
+ * 监听端口的容器
  */
 class Worker
 {
@@ -33,6 +41,7 @@ class Worker
      *
      * @var string
      */
+    //版本
     const VERSION = '3.4.2';
 
     /**
@@ -40,6 +49,7 @@ class Worker
      *
      * @var int
      */
+    //开始 状态
     const STATUS_STARTING = 1;
 
     /**
@@ -47,6 +57,7 @@ class Worker
      *
      * @var int
      */
+    //运行状态
     const STATUS_RUNNING = 2;
 
     /**
@@ -54,6 +65,7 @@ class Worker
      *
      * @var int
      */
+    //关闭状态
     const STATUS_SHUTDOWN = 4;
 
     /**
@@ -61,6 +73,7 @@ class Worker
      *
      * @var int
      */
+    //重新加载状态
     const STATUS_RELOADING = 8;
 
     /**
@@ -89,6 +102,7 @@ class Worker
      *
      * @var int
      */
+    //工作id
     public $id = 0;
 
     /**
@@ -96,6 +110,7 @@ class Worker
      *
      * @var string
      */
+    //进程名
     public $name = 'none';
 
     /**
@@ -103,6 +118,7 @@ class Worker
      *
      * @var int
      */
+    //进程数
     public $count = 1;
 
     /**
@@ -110,6 +126,7 @@ class Worker
      *
      * @var string
      */
+    //用户
     public $user = '';
 
     /**
@@ -117,6 +134,7 @@ class Worker
      *
      * @var string
      */
+    //用户组
     public $group = '';
 
     /**
@@ -124,6 +142,7 @@ class Worker
      *
      * @var bool
      */
+    //可重新加载？
     public $reloadable = true;
 
     /**
@@ -131,6 +150,7 @@ class Worker
      *
      * @var bool
      */
+    //平均分配端口
     public $reusePort = false;
 
     /**
@@ -138,6 +158,7 @@ class Worker
      *
      * @var callback
      */
+    //工作开始时
     public $onWorkerStart = null;
 
     /**
@@ -145,6 +166,7 @@ class Worker
      *
      * @var callback
      */
+    //连接时
     public $onConnect = null;
 
     /**
@@ -152,6 +174,7 @@ class Worker
      *
      * @var callback
      */
+    //有消息时
     public $onMessage = null;
 
     /**
@@ -159,6 +182,7 @@ class Worker
      *
      * @var callback
      */
+    //关闭时
     public $onClose = null;
 
     /**
@@ -166,6 +190,7 @@ class Worker
      *
      * @var callback
      */
+    //错误时
     public $onError = null;
 
     /**
@@ -173,6 +198,7 @@ class Worker
      *
      * @var callback
      */
+    // buffer满时
     public $onBufferFull = null;
 
     /**
@@ -180,6 +206,7 @@ class Worker
      *
      * @var callback
      */
+    //空时
     public $onBufferDrain = null;
 
     /**
@@ -187,6 +214,7 @@ class Worker
      *
      * @var callback
      */
+    //workerstop时
     public $onWorkerStop = null;
 
     /**
@@ -194,6 +222,7 @@ class Worker
      *
      * @var callback
      */
+    //worker 重新加载时
     public $onWorkerReload = null;
 
     /**
@@ -201,6 +230,7 @@ class Worker
      *
      * @var string
      */
+    //协议
     public $transport = 'tcp';
 
     /**
@@ -208,6 +238,7 @@ class Worker
      *
      * @var array
      */
+    //所有连接
     public $connections = array();
 
     /**
@@ -215,6 +246,7 @@ class Worker
      *
      * @var Protocols\ProtocolInterface
      */
+    //协议
     public $protocol = '';
 
     /**
@@ -222,6 +254,7 @@ class Worker
      *
      * @var string
      */
+    //自动加载根路径
     protected $_autoloadRootPath = '';
 
     /**
@@ -229,6 +262,7 @@ class Worker
      *
      * @var bool
      */
+    //后台
     public static $daemonize = false;
 
     /**
@@ -236,6 +270,7 @@ class Worker
      *
      * @var string
      */
+    //标准输入
     public static $stdoutFile = '/dev/null';
 
     /**
@@ -243,6 +278,7 @@ class Worker
      *
      * @var string
      */
+    //主pid文件
     public static $pidFile = '';
 
     /**
@@ -250,6 +286,7 @@ class Worker
      *
      * @var mixed
      */
+    //日志文件
     public static $logFile = '';
 
     /**
@@ -257,6 +294,7 @@ class Worker
      *
      * @var Events\EventInterface
      */
+    //全局事件
     public static $globalEvent = null;
 
     /**
@@ -264,6 +302,7 @@ class Worker
      *
      * @var callback
      */
+    //主重新加载
     public static $onMasterReload = null;
 
     /**
@@ -271,6 +310,7 @@ class Worker
      *
      * @var callback
      */
+    //主停止
     public static $onMasterStop = null;
 
     /**
@@ -278,6 +318,7 @@ class Worker
      *
      * @var string
      */
+    //事件类
     public static $eventLoopClass = '';
 
     /**
@@ -285,6 +326,7 @@ class Worker
      *
      * @var int
      */
+    //主pid
     protected static $_masterPid = 0;
 
     /**
@@ -292,6 +334,7 @@ class Worker
      *
      * @var resource
      */
+    //主socket
     protected $_mainSocket = null;
 
     /**
